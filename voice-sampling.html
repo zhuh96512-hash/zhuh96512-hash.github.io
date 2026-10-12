@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f5f2">
+<title>语音采样探索台 · 管理信息学</title>
+<style>
+:root{--ink:#f3f8ff;--ink2:#c8d6e5;--ink3:#91a6bb;--bg:#06101d;--card:#0d1a2b;--card2:#111f32;--line:#20334b;--line2:#31506d;--blue:#32d6ff;--blue2:#55ddff;--blueS:#12314a;--teal:#56e39f;--teal2:#56e39f;--tealS:#123b32;--orange:#ffd25a;--orangeS:#362f19;--red:#ff7185;--redS:#3a1f2a;--purple:#a88cff;--purpleS:#2a2545}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 65% -20%,#143252 0,transparent 35%),var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",sans-serif;font-size:16px;line-height:1.65}
+button,input{font:inherit}
+header{max-width:1420px;margin:auto;padding:24px 28px 0}.brand{display:flex;align-items:center;gap:14px;margin-bottom:18px}.mark{width:52px;height:52px;border-radius:15px;background:linear-gradient(145deg,#1bbbe8,#6be4ff);display:flex;align-items:center;justify-content:center;color:#062038;font-family:Georgia,"Times New Roman",serif;font-weight:800;font-style:italic;box-shadow:0 10px 30px #1bbbe838}.mark .symbol-f{font-size:31px;line-height:1}.mark sub{font-size:17px;line-height:1;margin:.72em 0 0 1px}.eyebrow{font-size:13px;letter-spacing:.035em;color:var(--blue);font-weight:700}
+h1{font-size:clamp(24px,2.6vw,36px);margin:0 0 2px;font-weight:800;letter-spacing:-.03em}
+.sub{margin:0;color:var(--ink3);font-size:14px}.sub b{color:var(--orange)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{font-size:15px;padding:10px 18px;border:1px solid var(--line);background:#0c1929;color:var(--ink3);border-radius:999px;cursor:pointer;transition:.2s}
+.tabs button:hover,.tabs button.on{border-color:var(--blue);background:#12314a;color:#e9fbff;font-weight:700;transform:translateY(-1px)}
+main{padding:20px 28px 34px;max-width:1420px;margin:auto}
+section{display:none}section.on{display:block}
+.card{background:linear-gradient(145deg,rgba(17,32,51,.97),rgba(9,21,35,.98));border:1px solid var(--line);border-radius:22px;padding:22px 24px;margin-bottom:18px;box-shadow:0 24px 60px #0004}
+h2{font-size:clamp(21px,2vw,29px);margin:0 0 5px}.k{display:block;color:var(--blue);font-size:12px;letter-spacing:.08em;font-weight:800;margin-bottom:3px}
+.lead{margin:0 0 16px;color:var(--ink3);font-size:15px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.row.wide-left{grid-template-columns:1.15fr .85fr}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
+.act{border:1px solid var(--line2);background:#0b1928;color:var(--ink);border-radius:11px;padding:10px 16px;cursor:pointer;transition:.2s}.act:hover{border-color:var(--blue);background:#12314a;transform:translateY(-1px)}.act.primary{background:var(--blue);border-color:var(--blue);color:#062038;font-weight:800}.act.primary:hover{background:#6be4ff}.act.danger{background:var(--red);border-color:var(--red);color:#210810;font-weight:800}
+.act:disabled{opacity:.4;cursor:not-allowed}
+.status{display:flex;align-items:center;gap:9px;padding:11px 14px;border-radius:11px;background:#0a1725;border:1px solid var(--line);color:var(--ink2);font-size:14px}.status .dot{width:10px;height:10px;border-radius:50%;background:var(--ink3);flex:none}.status.live{background:var(--redS);border-color:#713247;color:#ffd9df}.status.live .dot{background:var(--red);box-shadow:0 0 0 5px #ff718522}.status.ok{background:var(--tealS);border-color:#2c6d58;color:#c8ffe9}.status.ok .dot{background:var(--teal2)}
+.meter{height:8px;background:#17283a;border-radius:5px;overflow:hidden;flex:1;min-width:120px}.meter i{display:block;height:100%;width:0;background:var(--teal2);transition:width .06s}
+.canvasbox{border:1px solid var(--line);background:#07111d;border-radius:15px;padding:12px}
+.canvasbox h3,.panel-title{font-size:15px;margin:0 0 6px}.canvasbox p{margin:0 0 8px;color:var(--ink3);font-size:13px}
+canvas{display:block;width:100%;max-width:100%}
+#wave{height:230px}#spectrum{height:260px}#components{height:290px}#surface{height:460px;touch-action:none;cursor:grab}#surface:active{cursor:grabbing}#compare{height:250px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.metric{background:#0a1725;border:1px solid var(--line);border-radius:11px;padding:10px 12px}.metric span{display:block;color:var(--ink3);font-size:12px}.metric b{font-family:Consolas,monospace;font-size:22px;font-weight:700;color:var(--blue)}.metric b small{font:400 13px "Microsoft YaHei";color:var(--ink3);margin-left:3px}
+.note{margin-top:14px;padding:12px 15px;background:#2a2316;border-left:3px solid var(--orange);border-radius:4px 11px 11px 4px;color:#f4e5b8;font-size:14px}.note b{color:var(--orange)}
+.freq-list{display:grid;gap:7px;margin-top:10px}.freq-item{display:grid;grid-template-columns:76px 1fr 58px;gap:9px;align-items:center;font-size:13px}.freq-item b{font-family:Consolas,monospace}.bar{height:9px;background:#17283a;border-radius:5px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue2);border-radius:5px}
+.drag-tip{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--ink3);font-size:13px;margin-top:7px}
+.ratebar{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.rate{border:1px solid var(--line2);background:#0b1928;color:var(--ink);padding:8px 13px;border-radius:20px;cursor:pointer}.rate.on{background:var(--blue);border-color:var(--blue);color:#062038;font-weight:800}
+.verdict{padding:14px 16px;border-radius:11px;margin:12px 0;font-size:15px}.verdict.good{background:var(--tealS);border:1px solid #2c6d58;color:#c8ffe9}.verdict.bad{background:var(--redS);border:1px solid #713247;color:#ffd9df}.verdict strong{display:block;font-size:17px}
+.playrow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.formula{text-align:center;font-family:Cambria,Georgia,serif;font-size:20px;padding:12px;background:#0a1725;border:1px solid var(--line);border-radius:11px;color:#eafaff}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.step{padding:12px;background:#0a1725;border:1px solid var(--line);border-radius:11px}.step b{display:block;color:var(--blue);font-size:13px}.step span{font-size:14px;color:var(--ink2)}
+.save-panel{margin-top:14px;padding:14px 16px;border:1px solid #5b4d85;border-radius:14px;background:#1a1930}.save-panel b{display:block;color:#ded5ff}.save-panel p{margin:3px 0 0;color:var(--ink3);font-size:13px}.fourier-panel{margin:0 0 18px;padding:18px;border:1px solid #42506e;border-radius:16px;background:linear-gradient(145deg,#101d31,#0a1625)}.fourier-title{display:flex;justify-content:space-between;gap:14px;align-items:start}.fourier-title h3{margin:0;font-size:18px}.fourier-title span{color:var(--ink3);font-size:12px}.formula-stack{display:grid;grid-template-columns:1.35fr 1fr;gap:10px;margin:12px 0}.math{font-family:Cambria,Georgia,serif;font-size:19px;padding:12px;text-align:center;border-radius:11px;background:#07111d;border:1px solid var(--line);color:#edf7ff}.coef-table{width:100%;border-collapse:collapse;font-size:13px}.coef-table th,.coef-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}.coef-table th:first-child,.coef-table td:first-child{text-align:left}.coef-table th{color:var(--blue);font-weight:700}.coef-table td{color:var(--ink2)}.coef-table td strong{color:var(--orange)}
+.small{font-size:13px;color:var(--ink3)}
+footer{color:var(--ink3);font-size:13px;padding:0 28px 34px;max-width:1420px;margin:auto;text-align:center}
+@media(max-width:850px){.row,.row.wide-left,.formula-stack{grid-template-columns:1fr}.metrics,.steps{grid-template-columns:1fr 1fr}#surface{height:390px}}
+@media(max-width:560px){header,main,footer{padding-left:15px;padding-right:15px}.brand{align-items:flex-start}.mark{width:46px;height:46px}.metrics,.steps{grid-template-columns:1fr}.tabs button{padding:8px 10px;font-size:13px}.card{padding:16px}#surface{height:340px}.fourier-panel{padding:14px}.coef-table{font-size:11px}.coef-table th,.coef-table td{padding:7px 5px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="mark" aria-label="采样频率 f 下标 s"><span class="symbol-f">f</span><sub>s</sub></div>
+    <div><div class="eyebrow">合肥工业大学管理与智能科学学院 · 管理信息学课程——第五讲 信息采集</div><h1>语音采样探索台</h1><p class="sub"><b>一句话里，藏着许多同时变化的频率</b> · 录音、分析与播放全部在本机完成</p></div>
+  </div>
+  <div class="tabs" role="tablist" aria-label="探索步骤">
+    <button class="on" data-view="1" role="tab" aria-selected="true">① 录下一段声音</button>
+    <button data-view="2" role="tab" aria-selected="false">② 看见声音的组成</button>
+    <button data-view="3" role="tab" aria-selected="false">③ 改变采样率并试听</button>
+  </div>
+</header>
+
+<main>
+<section id="v1" class="on">
+  <div class="card">
+    <h2><span class="k">第一步 · 从现实声音进入信息系统</span>录下一句话，先看它在时间中怎样变化</h2>
+    <p class="lead">麦克风把空气振动转换为电信号，声卡再按固定时间间隔取值。这里记录的是声音，不做语音识别，所有分析都在本机浏览器中完成。</p>
+    <div class="actions">
+      <button class="act primary" id="recordBtn">开始录音（最长 6 秒）</button>
+      <button class="act" id="playCurrentFirst">播放当前声音</button>
+      <button class="act" id="demoBtn">载入内置录音</button>
+      <span class="small">建议朗读：“信息采集决定管理者看见什么。”</span>
+    </div>
+    <div id="recordStatus" class="status ok" aria-live="polite"><span class="dot"></span><span id="recordText">正在检查是否已有保存的内置录音…</span><span class="meter"><i id="level"></i></span></div>
+    <div class="save-panel">
+      <b>把现场录音变成你的内置声音</b>
+      <p>录音完成后，可保存到当前浏览器；也可以导出一个已嵌入录音的单文件离线版，复制到比赛电脑即可使用。</p>
+      <div class="actions" style="margin-bottom:0">
+        <button class="act" id="saveBuiltin" disabled>保存本次录音为内置声音</button>
+        <button class="act" id="exportEmbedded" disabled>导出带录音的离线版 HTML</button>
+        <span class="small" id="saveHint">请先完成一次现场录音</span>
+      </div>
+    </div>
+    <div class="canvasbox" style="margin-top:14px">
+      <h3>时域波形</h3>
+      <p>横轴是时间，纵轴是空气振动被数字化后的幅度。</p>
+      <canvas id="wave" aria-label="录音的时域波形"></canvas>
+    </div>
+    <div class="metrics">
+      <div class="metric"><span>片段长度</span><b id="duration">—</b></div>
+      <div class="metric"><span>原始采样率</span><b id="sourceRate">—</b></div>
+      <div class="metric"><span>样本数量</span><b id="sampleCount">—</b></div>
+    </div>
+    <div class="note"><b>课堂过渡：</b>这条看似复杂的曲线不是“一条波”。它是许多不同频率、不同强弱的波在同一时刻叠加的结果。下一步把它拆开来看。</div>
+  </div>
+</section>
+
+<section id="v2">
+  <div class="card">
+    <h2><span class="k">第二步 · 从时域走向频域</span>一句话不是一个频率，而是一组随时间变化的频率</h2>
+    <p class="lead">先用傅里叶级数表达“复杂声音可以拆成许多正弦波之和”，再查看当前录音计算出的主要频率及系数。</p>
+    <div class="fourier-panel">
+      <div class="fourier-title"><div><span class="k">数学表达 · 有限时间窗中的近似分解</span><h3>傅里叶级数与当前录音的计算系数</h3></div><span id="coefWindow">分析窗：—</span></div>
+      <div class="formula-stack">
+        <div class="math">x(t) ≈ a<sub>0</sub>/2 + Σ<sup>N</sup><sub>k=1</sub>[a<sub>k</sub>cos(2πf<sub>k</sub>t) + b<sub>k</sub>sin(2πf<sub>k</sub>t)]</div>
+        <div class="math">a<sub>k</sub> ≈ 2/N Σx<sub>n</sub>cos(2πf<sub>k</sub>t<sub>n</sub>)<br>b<sub>k</sub> ≈ 2/N Σx<sub>n</sub>sin(2πf<sub>k</sub>t<sub>n</sub>)</div>
+      </div>
+      <table class="coef-table" aria-label="当前录音的傅里叶系数">
+        <thead><tr><th>主要分量 f<sub>k</sub></th><th>余弦系数 a<sub>k</sub></th><th>正弦系数 b<sub>k</sub></th><th>幅值 A<sub>k</sub></th><th>相位 φ<sub>k</sub></th></tr></thead>
+        <tbody id="coefBody"><tr><td colspan="5">等待声音分析</td></tr></tbody>
+      </table>
+      <p class="small" style="margin:10px 0 0">语音不是严格周期信号。这里选取录音中能量较强的一小段作为有限时间窗，用离散求和近似计算系数，帮助理解“一个复杂信号由多个频率分量叠加而成”。</p>
+    </div>
+    <div class="row wide-left">
+      <div>
+        <div class="canvasbox">
+          <h3>频谱：这段声音由哪些频率组成</h3>
+          <canvas id="spectrum" aria-label="录音的频率频谱"></canvas>
+        </div>
+        <div class="freq-list" id="freqList"></div>
+        <div class="canvasbox" style="margin-top:14px">
+          <h3>主要频率分量：分开看，再叠加</h3>
+          <p>细线代表几个主要频率分量，深色粗线是它们叠加后的局部形状。</p>
+          <canvas id="components" aria-label="多个正弦频率分量及其叠加"></canvas>
+        </div>
+      </div>
+      <div>
+        <div class="canvasbox">
+          <h3>三维时频图</h3>
+          <p>时间 × 频率 × 能量。高处和暖色表示该时刻的频率成分更强。</p>
+          <canvas id="surface" aria-label="可拖拽旋转的三维语音时频图"></canvas>
+          <div class="drag-tip"><span>拖拽旋转 · 滚轮缩放</span><span id="viewAngle">方位 28° · 俯角 34°</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><b>要点：</b>时域图告诉我们“声音随时间怎样变化”，频域图告诉我们“由哪些频率组成”，三维时频图把两者合在一起。人的语音频率成分会随音节不断变化。</div>
+  </div>
+</section>
+
+<section id="v3">
+  <div class="card">
+    <h2><span class="k">第三步 · 采样率决定系统保留多少声音信息</span>选择采样率，听一听“少采一些”到底丢掉了什么</h2>
+    <p class="lead">选择采样率后，页面会重新抽取样本并播放近似重建的声音。三维图中的红色区域表示超过当前奈奎斯特频率、无法被可靠表示的成分。</p>
+    <div class="ratebar" id="ratebar" aria-label="选择采样率">
+      <button class="rate" data-rate="500">500 Hz</button>
+      <button class="rate" data-rate="1000">1 kHz</button>
+      <button class="rate" data-rate="2000">2 kHz</button>
+      <button class="rate" data-rate="4000">4 kHz</button>
+      <button class="rate" data-rate="8000">8 kHz</button>
+      <button class="rate" data-rate="12000">12 kHz</button>
+      <button class="rate" data-rate="16000">16 kHz</button>
+      <button class="rate" data-rate="24000">24 kHz</button>
+      <button class="rate on" data-rate="48000">48 kHz</button>
+    </div>
+    <div id="verdict" class="verdict good" aria-live="polite"></div>
+    <div class="playrow">
+      <button class="act" id="playOriginal">播放原始录音</button>
+      <button class="act primary" id="playSampled">播放当前采样效果</button>
+      <button class="act" id="stopPlay">停止播放</button>
+    </div>
+    <div class="row">
+      <div class="canvasbox">
+        <h3>原始信号与当前采样点</h3>
+        <p>蓝线是原始波形，橙点是当前采样率留下的数据。</p>
+        <canvas id="compare" aria-label="原始语音波形和采样点对比"></canvas>
+      </div>
+      <div>
+        <div class="metrics">
+          <div class="metric"><span>有效最高频率 f<sub>max</sub></span><b id="fmax">—</b></div>
+          <div class="metric"><span>奈奎斯特频率 f<sub>s</sub>/2</span><b id="nyquist">—</b></div>
+          <div class="metric"><span>采样率比值 f<sub>s</sub>/f<sub>max</sub></span><b id="ratio">—</b></div>
+        </div>
+        <div class="formula" id="formula" style="margin-top:14px">f<sub>s</sub> &gt; 2f<sub>max</sub></div>
+        <div class="steps">
+          <div class="step"><b>采得过慢</b><span>不同高频成分可能留下相同样本，产生混叠。</span></div>
+          <div class="step"><b>越过两倍</b><span>在理想带限条件下，样本足以唯一确定原信号。</span></div>
+          <div class="step"><b>工程应用</b><span>还要给滤波器、噪声和设备误差留出裕量。</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><b>严谨口径：</b>“大于两倍即可无失真恢复”针对理想带限信号和理想重建。真实语音、麦克风与浏览器播放都不是理想系统；本页用能量覆盖 98% 的频率作为“有效最高频率”，试听采用浏览器插值近似，目的是让混叠和信息损失可感知。</div>
+  </div>
+</section>
+</main>
+
+<footer>语音采样探索台 · 独立单文件教具 · 录音与分析均在本机完成 · ← → 键切换步骤</footer>
+
+<script id="embeddedAudioData">window.__BUILTIN_AUDIO__=null;</script>
+<script>
+(function(){
+"use strict";
+var TAU=Math.PI*2;
+var audio={data:null,rate:48000,duration:0,spectrum:null,peaks:[],coeffs:[],coefWindow:0,fmax:4000,spec3d:null};
+var selectedRate=48000,ctx=null,source=null,stream=null,processor=null,chunks=[],recording=false,recordTimer=null;
+var builtinAudio=null,freshRecording=false,storageKey="hfutVoiceBuiltinV1";
+var yaw=.49,pitch=.59,zoom=1,drag=false,lastX=0,lastY=0;
+var colors={ink:"#f3f8ff",ink2:"#c8d6e5",ink3:"#91a6bb",line:"#20334b",blue:"#32d6ff",blue2:"#55ddff",teal:"#56e39f",orange:"#ffd25a",red:"#ff7185",paper:"#07111d"};
+function el(id){return document.getElementById(id)}
+function fit(c){
+  var d=Math.min(2,window.devicePixelRatio||1),r=c.getBoundingClientRect(),w=Math.max(10,Math.floor(r.width*d)),h=Math.max(10,Math.floor(r.height*d));
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h}
+  return {ctx:c.getContext("2d"),w:w,h:h,d:d};
+}
+function ensureContext(){if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();return ctx}
+function normalize(a){
+  var m=0,i;for(i=0;i<a.length;i++){if(!Number.isFinite(a[i]))a[i]=0;m=Math.max(m,Math.abs(a[i]))}
+  if(m>.001){var g=.9/m;for(i=0;i<a.length;i++)a[i]*=g}
+  return a;
+}
+function encodePCM16(data){
+  var pcm=new Int16Array(data.length);for(var i=0;i<data.length;i++)pcm[i]=Math.max(-32768,Math.min(32767,Math.round(data[i]*32767)));
+  var bytes=new Uint8Array(pcm.buffer),parts=[],step=32768;for(i=0;i<bytes.length;i+=step)parts.push(String.fromCharCode.apply(null,bytes.subarray(i,Math.min(bytes.length,i+step))));return btoa(parts.join(""));
+}
+function decodePCM16(text){
+  var bin=atob(text),bytes=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);var pcm=new Int16Array(bytes.buffer),out=new Float32Array(pcm.length);for(i=0;i<pcm.length;i++)out[i]=pcm[i]/32767;return out;
+}
+function updateSaveUI(canSave,canExport,msg){el("saveBuiltin").disabled=!canSave;el("exportEmbedded").disabled=!canExport;if(msg)el("saveHint").textContent=msg}
+function loadBuiltinAudio(){
+  if(!builtinAudio){demoSignal();return}freshRecording=false;setAudio(new Float32Array(builtinAudio.data),builtinAudio.rate,"已载入你预先录制的内置声音");updateSaveUI(false,true,"当前页面已有可用的真人内置录音");
+}
+function initializeAudio(){
+  try{if(window.__BUILTIN_AUDIO__&&window.__BUILTIN_AUDIO__.pcm16){builtinAudio={data:decodePCM16(window.__BUILTIN_AUDIO__.pcm16),rate:+window.__BUILTIN_AUDIO__.rate||48000};el("demoBtn").textContent="载入页面内置录音";loadBuiltinAudio();return}}
+  catch(e){}
+  try{var saved=JSON.parse(localStorage.getItem(storageKey)||"null");if(saved&&saved.pcm16){builtinAudio={data:decodePCM16(saved.pcm16),rate:+saved.rate||48000};el("demoBtn").textContent="载入我保存的内置声音";loadBuiltinAudio();return}}
+  catch(e){}
+  demoSignal();updateSaveUI(false,false,"请先完成一次现场录音；当前使用合成示例音");
+}
+function demoSignal(){
+  var sr=48000,dur=4.2,n=Math.floor(sr*dur),out=new Float32Array(n);
+  var freqs=[180,440,880,1350,2300,3600,5200],amps=[.25,.20,.16,.14,.12,.10,.085];
+  for(var i=0;i<n;i++){
+    var t=i/sr,seg=Math.min(3,Math.floor(t/(dur/4))),local=(t-seg*dur/4)/(dur/4),env=Math.pow(Math.max(0,Math.sin(Math.PI*Math.max(0,Math.min(1,local)))),.55),s=0;
+    for(var k=0;k<freqs.length;k++){
+      var drift=1+.012*Math.sin(TAU*(.35+k*.07)*t+k),mod=.65+.35*Math.sin(TAU*(.55+k*.11)*t+k*.8);
+      s+=Math.sin(TAU*freqs[k]*drift*t+k*.4)*amps[k]*mod;
+    }
+    out[i]=s*env;
+  }
+  freshRecording=false;setAudio(normalize(out),sr,"尚未保存真人录音，当前载入的是合成示例音");
+}
+function setAudio(data,rate,msg){
+  audio.data=data;audio.rate=rate;audio.duration=data.length/rate;
+  analyze();
+  el("duration").innerHTML=audio.duration.toFixed(2)+"<small>秒</small>";
+  el("sourceRate").innerHTML=(rate/1000).toFixed(1)+"<small>kHz</small>";
+  el("sampleCount").innerHTML=data.length.toLocaleString()+"<small>个</small>";
+  el("recordStatus").className="status ok";el("recordText").textContent=msg;el("level").style.width="0";
+  drawAll();
+}
+function fftReal(input){
+  var n=input.length,re=new Float64Array(n),im=new Float64Array(n),i,j=0;
+  re.set(input);
+  for(i=1;i<n;i++){var bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){var tr=re[i];re[i]=re[j];re[j]=tr}}
+  for(var len=2;len<=n;len<<=1){
+    var ang=-TAU/len,wlr=Math.cos(ang),wli=Math.sin(ang);
+    for(i=0;i<n;i+=len){var wr=1,wi=0;for(j=0;j<len/2;j++){
+      var uR=re[i+j],uI=im[i+j],vR=re[i+j+len/2]*wr-im[i+j+len/2]*wi,vI=re[i+j+len/2]*wi+im[i+j+len/2]*wr;
+      re[i+j]=uR+vR;im[i+j]=uI+vI;re[i+j+len/2]=uR-vR;im[i+j+len/2]=uI-vI;
+      var nr=wr*wlr-wi*wli;wi=wr*wli+wi*wlr;wr=nr;
+    }}
+  }
+  return {re:re,im:im};
+}
+function frameFFT(start,size){
+  var x=new Float64Array(size),d=audio.data;
+  for(var i=0;i<size;i++){var idx=start+i;x[i]=(idx<d.length?d[idx]:0)*(.5-.5*Math.cos(TAU*i/(size-1)))}
+  var z=fftReal(x),m=new Float64Array(size/2);
+  for(i=0;i<m.length;i++)m[i]=z.re[i]*z.re[i]+z.im[i]*z.im[i];
+  return m;
+}
+function analyze(){
+  var size=2048,frames=18,sum=new Float64Array(size/2),span=Math.max(1,audio.data.length-size);
+  for(var f=0;f<frames;f++){var st=Math.floor(span*(f+.5)/frames),m=frameFFT(st,size);for(var i=0;i<m.length;i++)sum[i]+=m[i]}
+  var maxHz=Math.min(12000,audio.rate/2),maxBin=Math.min(sum.length-1,Math.floor(maxHz*size/audio.rate)),total=0;
+  for(i=2;i<=maxBin;i++)total+=sum[i];
+  var cum=0,cut=2;for(i=2;i<=maxBin;i++){cum+=sum[i];if(cum>=total*.98){cut=i;break}}
+  audio.fmax=Math.max(300,Math.round((cut*audio.rate/size)/50)*50);
+  var smooth=new Float64Array(maxBin+1),mx=0;
+  for(i=2;i<=maxBin;i++){smooth[i]=(sum[Math.max(0,i-1)]+sum[i]+sum[Math.min(maxBin,i+1)])/3;mx=Math.max(mx,smooth[i])}
+  audio.spectrum={power:smooth,max:mx,size:size,maxBin:maxBin,maxHz:maxHz};
+  var cand=[];
+  for(i=3;i<maxBin-2;i++)if(smooth[i]>smooth[i-1]&&smooth[i]>=smooth[i+1]&&smooth[i]>mx*.015)cand.push({bin:i,f:i*audio.rate/size,p:smooth[i]});
+  cand.sort(function(a,b){return b.p-a.p});var peaks=[];
+  for(i=0;i<cand.length&&peaks.length<6;i++){var ok=true;for(var q=0;q<peaks.length;q++)if(Math.abs(peaks[q].f-cand[i].f)<140)ok=false;if(ok)peaks.push(cand[i])}
+  if(!peaks.length)peaks=[{f:440,p:1,bin:Math.round(440*size/audio.rate)}];
+  audio.peaks=peaks;
+  computeCoefficients();
+  buildSpectrogram();
+}
+function computeCoefficients(){
+  var data=audio.data,rate=audio.rate,N=Math.min(data.length,Math.max(512,Math.round(rate*.08))),step=Math.max(128,Math.floor(N/2)),best=0,bestE=-1;
+  for(var st=0;st+N<=data.length;st+=step){var e=0;for(var n=0;n<N;n+=4)e+=data[st+n]*data[st+n];if(e>bestE){bestE=e;best=st}}
+  var coeffs=[];for(var p=0;p<Math.min(6,audio.peaks.length);p++){var f=audio.peaks[p].f,a=0,b=0;for(n=0;n<N;n++){var x=data[best+n]||0,phase=TAU*f*n/rate;a+=x*Math.cos(phase);b+=x*Math.sin(phase)}a=2*a/N;b=2*b/N;coeffs.push({f:f,a:a,b:b,A:Math.sqrt(a*a+b*b),phi:Math.atan2(-b,a)*180/Math.PI})}
+  audio.coeffs=coeffs;audio.coefWindow=N/rate;
+}
+function buildSpectrogram(){
+  var N=512,T=46,F=48,maxHz=Math.min(10000,audio.rate/2),rows=[],globalMax=-Infinity,globalMin=Infinity;
+  for(var ti=0;ti<T;ti++){
+    var st=Math.floor(Math.max(0,audio.data.length-N)*ti/(T-1)),m=frameFFT(st,N),row=[];
+    for(var fi=0;fi<F;fi++){var hz=maxHz*fi/(F-1),bin=Math.min(m.length-1,Math.round(hz*N/audio.rate)),v=10*Math.log10(m[bin]+1e-12);row.push(v);globalMax=Math.max(globalMax,v);globalMin=Math.min(globalMin,v)}
+    rows.push(row);
+  }
+  var floor=globalMax-58;
+  for(ti=0;ti<T;ti++)for(fi=0;fi<F;fi++)rows[ti][fi]=Math.max(0,Math.min(1,(rows[ti][fi]-floor)/(globalMax-floor)));
+  audio.spec3d={rows:rows,maxHz:maxHz,T:T,F:F};
+}
+function drawWave(){
+  var c=el("wave"),o=fit(c),g=o.ctx,w=o.w,h=o.h,d=o.d,pad=36*d;
+  g.clearRect(0,0,w,h);g.fillStyle=colors.paper;g.fillRect(0,0,w,h);g.strokeStyle=colors.line;g.lineWidth=d;
+  for(var k=0;k<=4;k++){var y=pad+(h-2*pad)*k/4;g.beginPath();g.moveTo(pad,y);g.lineTo(w-pad,y);g.stroke()}
+  g.beginPath();g.strokeStyle=colors.blue;g.lineWidth=2*d;var data=audio.data,cols=Math.max(1,Math.floor((w-2*pad)/d));
+  for(var x=0;x<cols;x++){var a=Math.floor(x*data.length/cols),b=Math.max(a+1,Math.floor((x+1)*data.length/cols)),lo=1,hi=-1;for(var i=a;i<b;i++){lo=Math.min(lo,data[i]);hi=Math.max(hi,data[i])}var px=pad+x*d;g.moveTo(px,h/2-hi*(h-2*pad)*.43);g.lineTo(px,h/2-lo*(h-2*pad)*.43)}
+  g.stroke();g.fillStyle=colors.ink3;g.font=12*d+"px Microsoft YaHei";g.textAlign="left";g.fillText("0 秒",pad,h-10*d);g.textAlign="right";g.fillText(audio.duration.toFixed(1)+" 秒",w-pad,h-10*d);
+}
+function drawSpectrum(){
+  var c=el("spectrum"),o=fit(c),g=o.ctx,w=o.w,h=o.h,d=o.d,padL=48*d,padR=18*d,padT=16*d,padB=34*d,s=audio.spectrum;
+  g.clearRect(0,0,w,h);g.fillStyle=colors.paper;g.fillRect(0,0,w,h);g.strokeStyle=colors.line;g.lineWidth=d;
+  for(var k=0;k<=4;k++){var y=padT+(h-padT-padB)*k/4;g.beginPath();g.moveTo(padL,y);g.lineTo(w-padR,y);g.stroke()}
+  g.beginPath();g.strokeStyle=colors.blue;g.lineWidth=2*d;
+  for(var i=1;i<=s.maxBin;i++){var x=padL+(w-padL-padR)*i/s.maxBin,v=Math.log10(1+s.power[i])/Math.log10(1+s.max),y=h-padB-v*(h-padT-padB);if(i===1)g.moveTo(x,y);else g.lineTo(x,y)}g.stroke();
+  var fx=padL+(w-padL-padR)*Math.min(audio.fmax,s.maxHz)/s.maxHz;g.strokeStyle=colors.orange;g.setLineDash([6*d,5*d]);g.beginPath();g.moveTo(fx,padT);g.lineTo(fx,h-padB);g.stroke();g.setLineDash([]);
+  g.fillStyle=colors.orange;g.font="bold "+12*d+"px Microsoft YaHei";g.textAlign=fx>w*.75?"right":"left";g.fillText("98% 能量带宽 ≈ "+audio.fmax+" Hz",fx+(fx>w*.75?-6:6)*d,padT+14*d);
+  g.fillStyle=colors.ink3;g.font=12*d+"px Microsoft YaHei";for(k=0;k<=4;k++){var hz=s.maxHz*k/4,xk=padL+(w-padL-padR)*k/4;g.textAlign=k===0?"left":(k===4?"right":"center");g.fillText((hz/1000).toFixed(hz<1000?1:0)+"k",xk,h-10*d)}
+  var list="";for(i=0;i<audio.peaks.length;i++){var pct=Math.max(7,Math.round(100*audio.peaks[i].p/audio.peaks[0].p));list+='<div class="freq-item"><b>'+Math.round(audio.peaks[i].f)+' Hz</b><span class="bar"><i style="width:'+pct+'%"></i></span><span>'+pct+'%</span></div>'}el("freqList").innerHTML=list;
+}
+function drawComponents(){
+  var c=el("components"),o=fit(c),g=o.ctx,w=o.w,h=o.h,d=o.d,pad=30*d,peaks=audio.peaks.slice(0,5),W=w-2*pad,mid=h/2,amp=22*d;
+  g.clearRect(0,0,w,h);g.fillStyle=colors.paper;g.fillRect(0,0,w,h);
+  var pal=["#2e64a8","#1d9e75","#b4531a","#7f77dd","#a32d2d"];
+  for(var p=0;p<peaks.length;p++){var yy=pad+(h-2*pad)*(p+.5)/(peaks.length+1);g.strokeStyle=colors.line;g.lineWidth=d;g.beginPath();g.moveTo(pad,yy);g.lineTo(w-pad,yy);g.stroke();g.strokeStyle=pal[p];g.lineWidth=1.4*d;g.beginPath();var cycles=1.5+p*.75;for(var x=0;x<=W;x++){var y=yy-Math.sin(TAU*cycles*x/W+p*.7)*amp*(.9-p*.09);if(x===0)g.moveTo(pad+x,y);else g.lineTo(pad+x,y)}g.stroke();g.fillStyle=pal[p];g.font=11*d+"px Consolas";g.textAlign="left";g.fillText(Math.round(peaks[p].f)+" Hz",pad+4*d,yy-amp-2*d)}
+  g.strokeStyle=colors.ink;g.lineWidth=2.4*d;g.beginPath();for(x=0;x<=W;x++){var sum=0;for(p=0;p<peaks.length;p++)sum+=Math.sin(TAU*(1.5+p*.75)*x/W+p*.7)*(1/peaks.length);var sy=h-pad-amp-sum*amp*1.25;if(x===0)g.moveTo(pad+x,sy);else g.lineTo(pad+x,sy)}g.stroke();g.fillStyle=colors.ink;g.font="bold "+12*d+"px Microsoft YaHei";g.fillText("叠加结果",pad+4*d,h-pad-amp*2.35);
+}
+function drawCoefficients(){
+  el("coefWindow").textContent="分析窗：录音中能量较强的 "+(audio.coefWindow*1000).toFixed(0)+" ms";var rows="";
+  for(var i=0;i<audio.coeffs.length;i++){var q=audio.coeffs[i];rows+="<tr><td><strong>"+Math.round(q.f)+" Hz</strong></td><td>"+q.a.toFixed(4)+"</td><td>"+q.b.toFixed(4)+"</td><td>"+q.A.toFixed(4)+"</td><td>"+q.phi.toFixed(1)+"°</td></tr>"}
+  el("coefBody").innerHTML=rows||'<tr><td colspan="5">没有检测到稳定的主要频率分量</td></tr>';
+}
+function project(x,y,z,w,h){
+  var cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch),x1=x*cy-z*sy,z1=x*sy+z*cy,y1=y*cp-z1*sp,z2=y*sp+z1*cp,sc=Math.min(w,h)*.31*zoom/(1+z2*.18);
+  return {x:w*.5+x1*sc,y:h*.64-y1*sc,z:z2};
+}
+function heat(v,over){
+  if(over)return "rgba(163,45,45,"+(0.10+v*.72)+")";
+  var r=Math.round(46+(180-46)*v),gg=Math.round(100+(83-100)*v),b=Math.round(168+(26-168)*v);
+  return "rgba("+r+","+gg+","+b+","+(0.08+v*.72)+")";
+}
+function drawSurface(){
+  if(!audio.spec3d)return;var c=el("surface"),o=fit(c),g=o.ctx,w=o.w,h=o.h,d=o.d,s=audio.spec3d,rows=s.rows,cells=[];
+  g.clearRect(0,0,w,h);g.fillStyle=colors.paper;g.fillRect(0,0,w,h);
+  for(var t=0;t<s.T-1;t++)for(var f=0;f<s.F-1;f++){
+    var x0=-1+2*t/(s.T-1),x1=-1+2*(t+1)/(s.T-1),z0=-1+2*f/(s.F-1),z1=-1+2*(f+1)/(s.F-1);
+    var a=project(x0,rows[t][f]*.95,z0,w,h),b=project(x1,rows[t+1][f]*.95,z0,w,h),cc=project(x1,rows[t+1][f+1]*.95,z1,w,h),dd=project(x0,rows[t][f+1]*.95,z1,w,h);
+    cells.push({p:[a,b,cc,dd],v:(rows[t][f]+rows[t+1][f]+rows[t+1][f+1]+rows[t][f+1])/4,z:(a.z+b.z+cc.z+dd.z)/4,hz:s.maxHz*(f+.5)/(s.F-1)});
+  }
+  cells.sort(function(a,b){return b.z-a.z});
+  for(var i=0;i<cells.length;i++){var q=cells[i],over=q.hz>selectedRate/2;g.beginPath();g.moveTo(q.p[0].x,q.p[0].y);for(var j=1;j<4;j++)g.lineTo(q.p[j].x,q.p[j].y);g.closePath();g.fillStyle=heat(q.v,over);g.fill()}
+  g.strokeStyle="#9b958a";g.lineWidth=d;var O=project(-1,0,-1,w,h),X=project(1,0,-1,w,h),Z=project(-1,0,1,w,h),Y=project(-1,1,-1,w,h);
+  [[O,X],[O,Z],[O,Y]].forEach(function(a){g.beginPath();g.moveTo(a[0].x,a[0].y);g.lineTo(a[1].x,a[1].y);g.stroke()});
+  var cut=Math.min(1,Math.max(-1,-1+2*(selectedRate/2)/s.maxHz)),ca=project(-1,.02,cut,w,h),cb=project(1,.02,cut,w,h);g.strokeStyle=colors.red;g.lineWidth=2*d;g.setLineDash([6*d,5*d]);g.beginPath();g.moveTo(ca.x,ca.y);g.lineTo(cb.x,cb.y);g.stroke();g.setLineDash([]);
+  g.fillStyle=colors.ink2;g.font=12*d+"px Microsoft YaHei";g.textAlign="center";g.fillText("时间",X.x,X.y+18*d);g.fillText("频率",Z.x,Z.y+18*d);g.textAlign="left";g.fillText("能量",Y.x+5*d,Y.y);
+  g.fillStyle=colors.red;g.fillText("当前上限 "+Math.round(selectedRate/2)+" Hz",cb.x+5*d,cb.y-5*d);
+  el("viewAngle").textContent="方位 "+Math.round(yaw*180/Math.PI)+"° · 俯角 "+Math.round(pitch*180/Math.PI)+"°";
+}
+function drawCompare(){
+  var c=el("compare"),o=fit(c),g=o.ctx,w=o.w,h=o.h,d=o.d,pad=36*d,data=audio.data,windowSec=Math.min(.035,audio.duration),count=Math.max(20,Math.floor(windowSec*audio.rate)),start=Math.floor(Math.max(0,(data.length-count)/2));
+  g.clearRect(0,0,w,h);g.fillStyle=colors.paper;g.fillRect(0,0,w,h);g.strokeStyle=colors.line;g.beginPath();g.moveTo(pad,h/2);g.lineTo(w-pad,h/2);g.stroke();
+  g.strokeStyle=colors.blue;g.lineWidth=2*d;g.beginPath();for(var i=0;i<count;i++){var x=pad+(w-2*pad)*i/(count-1),y=h/2-data[start+i]*(h-2*pad)*.42;if(i===0)g.moveTo(x,y);else g.lineTo(x,y)}g.stroke();
+  var step=audio.rate/selectedRate,points=Math.min(80,Math.floor(count/step));g.fillStyle=colors.orange;for(var n=0;n<points;n++){var idx=Math.min(count-1,Math.round(n*step)),px=pad+(w-2*pad)*idx/(count-1),py=h/2-data[start+idx]*(h-2*pad)*.42;g.beginPath();g.arc(px,py,3.3*d,0,TAU);g.fill()}
+  g.fillStyle=colors.ink3;g.font=12*d+"px Microsoft YaHei";g.textAlign="left";g.fillText("约 "+(windowSec*1000).toFixed(0)+" 毫秒",pad,h-10*d);g.textAlign="right";g.fillText("橙点 "+points+" 个",w-pad,h-10*d);
+}
+function updateRate(){
+  var safe=selectedRate>2*audio.fmax,ratio=selectedRate/audio.fmax,nyq=selectedRate/2,v=el("verdict");
+  el("fmax").innerHTML=audio.fmax+"<small>Hz</small>";el("nyquist").innerHTML=nyq.toLocaleString()+"<small>Hz</small>";el("ratio").textContent=ratio.toFixed(2);
+  el("formula").innerHTML="f<sub>s</sub> = "+selectedRate.toLocaleString()+" Hz　"+(safe?"&gt;":"≤")+"　2f<sub>max</sub> = "+(2*audio.fmax).toLocaleString()+" Hz";
+  v.className="verdict "+(safe?"good":"bad");
+  v.innerHTML=safe?"<strong>满足理想采样条件</strong>当前采样率高于有效最高频率的两倍；在带限和理想重建条件下，样本可以唯一确定原信号。":"<strong>存在混叠：部分声音成分无法可靠恢复</strong>当前奈奎斯特频率只有 "+nyq.toLocaleString()+" Hz，但片段中仍有明显成分延伸到约 "+audio.fmax.toLocaleString()+" Hz。";
+  document.querySelectorAll(".rate").forEach(function(b){var on=+b.dataset.rate===selectedRate;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)});
+  drawCompare();drawSurface();
+}
+function drawAll(){drawWave();drawSpectrum();drawComponents();drawCoefficients();drawCompare();drawSurface();updateRate()}
+function resample(rate){
+  var n=Math.max(1,Math.floor(audio.duration*rate)),out=new Float32Array(n),scale=audio.rate/rate;
+  for(var i=0;i<n;i++){var pos=i*scale,a=Math.floor(pos),b=Math.min(audio.data.length-1,a+1),u=pos-a;out[i]=(audio.data[a]||0)*(1-u)+(audio.data[b]||0)*u}
+  return out;
+}
+function reconstructForPlayback(rate){
+  var low=resample(rate),out=new Float32Array(audio.data.length),scale=rate/audio.rate;
+  for(var i=0;i<out.length;i++){var pos=i*scale,a=Math.min(low.length-1,Math.floor(pos)),b=Math.min(low.length-1,a+1),u=pos-a;out[i]=low[a]*(1-u)+low[b]*u}
+  return out;
+}
+function play(data,rate){
+  stopPlayback();var ac=ensureContext();ac.resume();var b=ac.createBuffer(1,data.length,rate);b.copyToChannel(data,0);source=ac.createBufferSource();source.buffer=b;source.connect(ac.destination);source.start();source.onended=function(){source=null};
+}
+function stopPlayback(){if(source){try{source.stop()}catch(e){}source.disconnect();source=null}}
+async function startRecord(){
+  try{
+    var ac=ensureContext();await ac.resume();stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+    chunks=[];var input=ac.createMediaStreamSource(stream);processor=ac.createScriptProcessor(2048,1,1);var mute=ac.createGain();mute.gain.value=0;
+    processor.onaudioprocess=function(e){var x=e.inputBuffer.getChannelData(0),copy=new Float32Array(x);chunks.push(copy);var sum=0;for(var i=0;i<x.length;i++)sum+=x[i]*x[i];el("level").style.width=Math.min(100,Math.sqrt(sum/x.length)*340)+"%"};
+    input.connect(processor);processor.connect(mute);mute.connect(ac.destination);processor._input=input;processor._mute=mute;recording=true;
+    el("recordBtn").textContent="停止并分析";el("recordBtn").className="act danger";el("recordStatus").className="status live";el("recordText").textContent="正在录音…请朗读一句话";
+    recordTimer=setTimeout(stopRecord,6000);
+  }catch(e){el("recordStatus").className="status";el("recordText").textContent="无法使用麦克风，请允许录音权限，或使用内置示例音。"}
+}
+function stopRecord(){
+  if(!recording)return;recording=false;clearTimeout(recordTimer);
+  if(processor){processor.disconnect();if(processor._input)processor._input.disconnect();processor=null}if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}
+  var len=0;chunks.forEach(function(x){len+=x.length});var out=new Float32Array(len),p=0;chunks.forEach(function(x){out.set(x,p);p+=x.length});chunks=[];
+  el("recordBtn").textContent="重新录音（最长 6 秒）";el("recordBtn").className="act primary";
+  if(out.length<ensureContext().sampleRate*.25){el("recordStatus").className="status";el("recordText").textContent="录音太短，请重新录制至少半秒。";return}
+  freshRecording=true;setAudio(normalize(out),ensureContext().sampleRate,"录音完成，已生成时域、频域、傅里叶系数和三维时频图");updateSaveUI(true,true,"录音已准备好，请保存为内置声音或导出离线版");
+}
+function saveBuiltin(){
+  if(!audio.data||!freshRecording)return;var pcm16=encodePCM16(audio.data);
+  try{localStorage.setItem(storageKey,JSON.stringify({rate:audio.rate,pcm16:pcm16,savedAt:new Date().toISOString()}));builtinAudio={data:new Float32Array(audio.data),rate:audio.rate};freshRecording=false;el("demoBtn").textContent="载入我保存的内置声音";el("recordStatus").className="status ok";el("recordText").textContent="已保存为本机内置声音；以后点击“载入我保存的内置声音”即可使用";updateSaveUI(false,true,"已保存到当前浏览器；换电脑请使用右侧导出按钮")}
+  catch(e){el("recordStatus").className="status";el("recordText").textContent="浏览器没有允许本地保存。请直接使用“导出带录音的离线版 HTML”。";updateSaveUI(true,true,"本机存储失败，但仍可导出单文件离线版")}
+}
+function exportEmbedded(){
+  var src=freshRecording?{data:audio.data,rate:audio.rate}:builtinAudio;if(!src||!src.data)return;var payload={rate:src.rate,pcm16:encodePCM16(src.data)},clone=document.documentElement.cloneNode(true),tag=clone.querySelector("#embeddedAudioData");tag.textContent="window.__BUILTIN_AUDIO__="+JSON.stringify(payload)+";";
+  clone.querySelectorAll("canvas").forEach(function(c){c.removeAttribute("width");c.removeAttribute("height")});var html="<!DOCTYPE html>\n"+clone.outerHTML,blob=new Blob([html],{type:"text/html;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="教具3-语音采样探索台-已内置录音.html";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},2000);el("recordStatus").className="status ok";el("recordText").textContent="已导出带真人录音的单文件离线版，可复制到比赛电脑使用";
+}
+el("recordBtn").addEventListener("click",function(){recording?stopRecord():startRecord()});
+el("playCurrentFirst").addEventListener("click",function(){if(audio.data)play(audio.data,audio.rate)});
+el("demoBtn").addEventListener("click",loadBuiltinAudio);
+el("saveBuiltin").addEventListener("click",saveBuiltin);
+el("exportEmbedded").addEventListener("click",exportEmbedded);
+el("playOriginal").addEventListener("click",function(){play(audio.data,audio.rate)});
+el("playSampled").addEventListener("click",function(){play(reconstructForPlayback(selectedRate),audio.rate)});
+el("stopPlay").addEventListener("click",stopPlayback);
+el("ratebar").addEventListener("click",function(e){var b=e.target.closest(".rate");if(!b)return;selectedRate=+b.dataset.rate;updateRate()});
+var surf=el("surface");
+surf.addEventListener("pointerdown",function(e){drag=true;lastX=e.clientX;lastY=e.clientY;surf.setPointerCapture(e.pointerId)});
+surf.addEventListener("pointermove",function(e){if(!drag)return;yaw+=(e.clientX-lastX)*.009;pitch=Math.max(.12,Math.min(1.25,pitch+(e.clientY-lastY)*.009));lastX=e.clientX;lastY=e.clientY;drawSurface()});
+surf.addEventListener("pointerup",function(){drag=false});surf.addEventListener("pointercancel",function(){drag=false});
+surf.addEventListener("wheel",function(e){e.preventDefault();zoom=Math.max(.68,Math.min(1.45,zoom*(e.deltaY>0?.93:1.07)));drawSurface()},{passive:false});
+var tabs=[].slice.call(document.querySelectorAll(".tabs button")),secs=[].slice.call(document.querySelectorAll("main section"));
+function show(v){tabs.forEach(function(b){var on=b.dataset.view===v;b.classList.toggle("on",on);b.setAttribute("aria-selected",on)});secs.forEach(function(s){s.classList.toggle("on",s.id==="v"+v)});requestAnimationFrame(drawAll)}
+tabs.forEach(function(b){b.addEventListener("click",function(){show(b.dataset.view)})});
+document.addEventListener("keydown",function(e){if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;var i=tabs.findIndex(function(b){return b.classList.contains("on")});i=(i+(e.key==="ArrowRight"?1:-1)+tabs.length)%tabs.length;show(tabs[i].dataset.view)});
+window.addEventListener("resize",function(){requestAnimationFrame(drawAll)});
+  initializeAudio();
+})();
+</script>
+</body>
+</html>
